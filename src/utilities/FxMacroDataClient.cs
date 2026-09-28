@@ -4,6 +4,11 @@ using System.Text.Json;
 
 namespace Utilities;
 
+/// <remarks>
+/// List endpoints (announcements, predictions, forex, COT, commodities) return 20 rows by
+/// default and at most 100 per request, newest first. Pass "limit" and "offset" in the query
+/// and follow pagination.next_offset while pagination.has_more is true.
+/// </remarks>
 public sealed class FxMacroDataClient
 {
     private static readonly Uri DefaultBaseUri = new("https://api.fxmacrodata.com/v1/");

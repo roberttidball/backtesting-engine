@@ -25,13 +25,14 @@ public class FxMacroDataClientTests
             "usd",
             new Dictionary<string, string?>
             {
-                ["limit"] = "1"
+                ["limit"] = "100",
+                ["offset"] = "200"
             });
 
         Assert.True(result.GetProperty("ok").GetBoolean());
         Assert.Equal(HttpMethod.Get, handler.LastRequest?.Method);
         Assert.Equal(
-            "https://example.com/api/v1/forex/eur/usd?limit=1",
+            "https://example.com/api/v1/forex/eur/usd?limit=100&offset=200",
             handler.LastRequest?.RequestUri?.ToString());
         Assert.Equal(new[] { "test-key" }, handler.LastRequest?.Headers.GetValues("X-API-Key"));
     }
