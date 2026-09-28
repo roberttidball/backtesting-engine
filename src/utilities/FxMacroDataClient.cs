@@ -169,9 +169,10 @@ public sealed class FxMacroDataClient
             variables
         });
 
-        using var content = new StringContent(body, Encoding.UTF8, "application/json");
+        using var request = CreateRequest(HttpMethod.Post, BuildUri("graphql"));
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
         using var response = await _httpClient
-            .PostAsync(BuildUri("graphql"), content, cancellationToken)
+            .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
         return await ParseJsonAsync(response, cancellationToken).ConfigureAwait(false);
@@ -182,15 +183,7 @@ public sealed class FxMacroDataClient
         var relativePath = path.TrimStart('/');
         var uri = new Uri(_baseUri, relativePath);
 
-        var parameters = new List<KeyValuePair<string, string?>>
-        {
-            new("api_key", _apiKey)
-        };
-
-        if (query is not null)
-        {
-            parameters.InsertRange(0, query);
-        }
+        var parameters = query ?? new Dictionary<string, string?>();
 
         var queryString = string.Join(
             "&",
@@ -209,11 +202,19 @@ public sealed class FxMacroDataClient
         IReadOnlyDictionary<string, string?>? query,
         CancellationToken cancellationToken)
     {
+        using var request = CreateRequest(HttpMethod.Get, BuildUri(path, query));
         using var response = await _httpClient
-            .GetAsync(BuildUri(path, query), cancellationToken)
+            .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
         return await ParseJsonAsync(response, cancellationToken).ConfigureAwait(false);
+    }
+
+    private HttpRequestMessage CreateRequest(HttpMethod method, Uri uri)
+    {
+        var request = new HttpRequestMessage(method, uri);
+        request.Headers.Add("X-API-Key", _apiKey);
+        return request;
     }
 
     private static async Task<JsonElement> ParseJsonAsync(

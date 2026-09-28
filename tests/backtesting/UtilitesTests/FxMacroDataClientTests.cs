@@ -12,7 +12,7 @@ namespace tests.backtesting.UtilitesTests;
 public class FxMacroDataClientTests
 {
     [Fact]
-    public async Task ForexAsyncAddsApiKeyAndQueryParameters()
+    public async Task ForexAsyncSendsApiKeyHeaderAndQueryParameters()
     {
         var handler = new CaptureHandler();
         var client = new FxMacroDataClient(
@@ -31,8 +31,9 @@ public class FxMacroDataClientTests
         Assert.True(result.GetProperty("ok").GetBoolean());
         Assert.Equal(HttpMethod.Get, handler.LastRequest?.Method);
         Assert.Equal(
-            "https://example.com/api/v1/forex/eur/usd?limit=1&api_key=test-key",
+            "https://example.com/api/v1/forex/eur/usd?limit=1",
             handler.LastRequest?.RequestUri?.ToString());
+        Assert.Equal(new[] { "test-key" }, handler.LastRequest?.Headers.GetValues("X-API-Key"));
     }
 
     [Fact]
@@ -72,7 +73,7 @@ public class FxMacroDataClientTests
             var uri = client.BuildUri(path);
 
             Assert.StartsWith("https://example.com/api/v1/", uri.ToString());
-            Assert.Contains("api_key=test-key", uri.Query);
+            Assert.DoesNotContain("api_key", uri.Query);
         }
     }
 
