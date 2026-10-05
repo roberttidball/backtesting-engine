@@ -25,7 +25,8 @@ public sealed class FxMacroDataClient
         }
 
         _apiKey = apiKey;
-        _httpClient = httpClient ?? new HttpClient();
+        // Redirects are not followed, so the X-API-Key header is never forwarded to another host.
+        _httpClient = httpClient ?? new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
         _baseUri = NormalizeBaseUri(baseUri ?? DefaultBaseUri);
     }
 
